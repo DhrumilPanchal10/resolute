@@ -118,7 +118,7 @@ resolute/
 - [x] **T2.2 Routing + fallback** · Tool: Claude Code · Model: default
   - Do: `routing.py` — tier → ordered list of (provider, model); on rate limit / 5xx fall back to next; retries with tenacity (exponential backoff, jitter); per-run token and cost budget enforcement raising `BudgetExceeded`.
   - Done when: tests simulate 429 → fallback, budget exceed → error.
-- [ ] **T2.3 Database + RLS** · Tool: Claude Code · Model: default
+- [x] **T2.3 Database + RLS** · Tool: Claude Code · Model: default
   - Do: `migrations/001_core.sql`: tenants, users, accounts, invoices, tickets, messages, audit_events, memories, approvals; `tenant_id` on every tenant table; enable RLS with policy `tenant_id = current_setting('app.tenant_id')`; `db.py` sets `app.tenant_id` per session.
   - Done when: integration test proves tenant A session cannot read tenant B rows.
 - [ ] **T2.4 Auth + RBAC** · Tool: Claude Code · Model: default
