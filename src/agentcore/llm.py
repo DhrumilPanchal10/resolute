@@ -2,27 +2,52 @@ import time
 from typing import Any
 
 import litellm
+import litellm.exceptions as litellm_exc
 from pydantic import BaseModel
+from tenacity import (
+    retry,
+    retry_if_exception,
+    stop_after_attempt,
+    wait_exponential_jitter,
+)
 
 from agentcore.cost import CallCost, RunCost
+from agentcore.errors import BudgetExceeded
 from agentcore.offline import is_offline, load_fixture, save_fixture
+from agentcore.routing import Route, routes_for_tier
 from resolute.config import settings
 
 # Suppress litellm's default verbose logging
 litellm.suppress_debug_info = True
 
-_TIER_TO_MODEL: dict[str, str] = {
-    "small": settings.model_small,
-    "strong": settings.model_strong,
-    "judge": settings.model_judge,
-}
+_MAX_RETRIES_PER_ROUTE = 2
+_RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+_RETRYABLE_TYPES = (
+    litellm_exc.RateLimitError,
+    litellm_exc.InternalServerError,
+    litellm_exc.ServiceUnavailableError,
+    litellm_exc.BadGatewayError,
+    litellm_exc.APIConnectionError,
+)
 
-# Shared run-level cost accumulator; callers may replace with their own.
-_default_run_cost = RunCost()
+
+def _is_retryable(exc: BaseException) -> bool:
+    return isinstance(exc, _RETRYABLE_TYPES)
 
 
-def get_default_run_cost() -> RunCost:
-    return _default_run_cost
+def _make_retrying_call(route: Route) -> Any:
+    """Return a tenacity-wrapped async callable for a single route."""
+
+    @retry(
+        retry=retry_if_exception(_is_retryable),
+        stop=stop_after_attempt(_MAX_RETRIES_PER_ROUTE),
+        wait=wait_exponential_jitter(multiplier=0.5, max=10),
+        reraise=True,
+    )
+    async def _call(**kwargs: Any) -> Any:
+        return await litellm.acompletion(model=route.model, **kwargs)
+
+    return _call
 
 
 async def complete(
@@ -35,73 +60,95 @@ async def complete(
 ) -> Any:
     """Call an LLM and return a parsed Pydantic model (if schema given) or raw text.
 
-    With OFFLINE=1, replays a recorded fixture instead of calling the API.
-    Records cost and latency into run_cost (falls back to the module-level default).
+    - OFFLINE=1: replays a recorded fixture; missing fixture raises OfflineFixtureError.
+    - Live: iterates routes_for_tier(), retrying each with exponential back-off+jitter;
+      falls back to the next route when retries for one route are exhausted.
+    - Raises BudgetExceeded before any call that would exceed settings.budget_usd_max.
+    - Auto-saves each live response as a fixture for future offline replay.
     """
-    model = _TIER_TO_MODEL.get(model_tier, settings.model_small)
+    tracker = run_cost if run_cost is not None else RunCost()
     schema_name = schema.__name__ if schema is not None else None
-    tracker = run_cost if run_cost is not None else _default_run_cost
 
+    # --- Budget pre-check ---
+    if tracker.total_cost_usd >= settings.budget_usd_max:
+        raise BudgetExceeded(spent=tracker.total_cost_usd, limit=settings.budget_usd_max)
+
+    # --- Offline replay ---
     if is_offline():
         raw = load_fixture(model_tier, messages, schema_name)
-        content = raw.get("content", "")
-        input_tokens = raw.get("input_tokens", 0)
-        output_tokens = raw.get("output_tokens", 0)
-        cost_usd = raw.get("cost_usd", 0.0)
-        latency_ms = raw.get("latency_ms", 0.0)
+        _record_cost(tracker, raw.get("model", model_tier), raw)
+        return _parse(raw["content"], schema)
+
+    # --- Live call with route fallback ---
+    routes = routes_for_tier(model_tier)
+    last_exc: BaseException | None = None
+
+    for route in routes:
+        call = _make_retrying_call(route)
+        call_kwargs: dict[str, Any] = {"messages": messages, **kwargs}
+        if schema is not None:
+            call_kwargs["response_format"] = schema
+
+        try:
+            t0 = time.perf_counter()
+            response = await call(**call_kwargs)
+            latency_ms = (time.perf_counter() - t0) * 1000
+        except _RETRYABLE_TYPES as exc:
+            last_exc = exc
+            continue  # try next route
+
+        usage = getattr(response, "usage", None)
+        input_tokens = getattr(usage, "prompt_tokens", 0) or 0
+        output_tokens = getattr(usage, "completion_tokens", 0) or 0
+        cost_usd = litellm.completion_cost(completion_response=response)
+        live_content: str = response.choices[0].message.content or ""
+
         tracker.record(
             CallCost(
-                model=model,
+                model=route.model,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 latency_ms=latency_ms,
                 cost_usd=cost_usd,
             )
         )
-        if schema is not None:
-            return schema.model_validate_json(content)
-        return content
 
-    # Live call via LiteLLM
-    call_kwargs: dict[str, Any] = {"model": model, "messages": messages, **kwargs}
-    if schema is not None:
-        call_kwargs["response_format"] = schema
+        save_fixture(
+            model_tier,
+            messages,
+            schema_name,
+            {
+                "content": live_content,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "cost_usd": cost_usd,
+                "latency_ms": latency_ms,
+            },
+        )
 
-    t0 = time.perf_counter()
-    response = await litellm.acompletion(**call_kwargs)
-    latency_ms = (time.perf_counter() - t0) * 1000
+        return _parse(live_content, schema)
 
-    usage = getattr(response, "usage", None)
-    input_tokens = getattr(usage, "prompt_tokens", 0) or 0
-    output_tokens = getattr(usage, "completion_tokens", 0) or 0
-    cost_usd = litellm.completion_cost(completion_response=response)
+    raise RuntimeError(f"All routes exhausted for tier={model_tier!r}.") from last_exc
 
-    live_content: str = response.choices[0].message.content or ""
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _record_cost(tracker: RunCost, model: str, raw: dict[str, Any]) -> None:
     tracker.record(
         CallCost(
             model=model,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            latency_ms=latency_ms,
-            cost_usd=cost_usd,
+            input_tokens=raw.get("input_tokens", 0),
+            output_tokens=raw.get("output_tokens", 0),
+            latency_ms=raw.get("latency_ms", 0.0),
+            cost_usd=raw.get("cost_usd", 0.0),
         )
     )
 
-    # Persist fixture for future offline replay
-    save_fixture(
-        model_tier,
-        messages,
-        schema_name,
-        {
-            "content": live_content,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "cost_usd": cost_usd,
-            "latency_ms": latency_ms,
-        },
-    )
 
+def _parse(content: str, schema: type[BaseModel] | None) -> Any:
     if schema is not None:
-        return schema.model_validate_json(live_content)
-    return live_content
+        return schema.model_validate_json(content)
+    return content

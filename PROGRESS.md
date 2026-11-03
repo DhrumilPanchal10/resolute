@@ -2,3 +2,4 @@ T0.1 (2026-11-03): Scaffolded repo layout, pyproject.toml (uv, 169 packages), Ma
 T0.3 (2026-11-03): config.py (pydantic-settings, all env vars); docker-compose.yml already complete; `from resolute.config import settings` works.
 T0.4 (2026-11-03): CI workflow already created in T0.1; fixed install command (--group dev, no --all-extras to avoid pulling torch in CI).
 T1.3 (2026-11-03): agentcore/errors.py (OfflineFixtureError, BudgetExceeded), agentcore/cost.py (RunCost/CallCost), agentcore/offline.py (fixture record/replay keyed by sha256), agentcore/llm.py (async complete via LiteLLM + offline replay + cost tracking); 8 tests pass with OFFLINE=1.
+T2.2 (2026-11-03): routing.py (tier→ordered Route list from config); llm.py updated with tenacity retry+jitter per route, route fallback on RateLimitError/5xx, budget pre-check raising BudgetExceeded; 5 new tests (429 fallback, all-routes-fail, budget exceeded).
