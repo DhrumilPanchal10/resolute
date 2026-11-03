@@ -83,7 +83,7 @@ resolute/
   - Done when: `make install && make lint && make test` succeeds (empty test passes).
 - [ ] **T0.2 Agent instruction files** · Tool: you (manual)
   - Do: create `AGENTS.md` from Appendix A; `CLAUDE.md` containing the single line `@AGENTS.md`; `.claude/commands/task.md` from Appendix B; empty `PROGRESS.md`.
-- [ ] **T0.3 Config + compose** · Tool: Claude Code · Model: small
+- [x] **T0.3 Config + compose** · Tool: Claude Code · Model: small
   - Do: `config.py` (pydantic-settings, all env vars); `docker-compose.yml` with `postgres` (pgvector image) and `redis` only, memory limits 512m/128m.
   - Done when: `make up` starts both; `python -c "from resolute.config import settings"` works.
 - [ ] **T0.4 CI skeleton** · Tool: Claude Code · Model: small
