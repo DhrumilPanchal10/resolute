@@ -86,7 +86,7 @@ resolute/
 - [x] **T0.3 Config + compose** · Tool: Claude Code · Model: small
   - Do: `config.py` (pydantic-settings, all env vars); `docker-compose.yml` with `postgres` (pgvector image) and `redis` only, memory limits 512m/128m.
   - Done when: `make up` starts both; `python -c "from resolute.config import settings"` works.
-- [ ] **T0.4 CI skeleton** · Tool: Claude Code · Model: small
+- [x] **T0.4 CI skeleton** · Tool: Claude Code · Model: small
   - Do: GitHub Actions: uv install, ruff, mypy, pytest with `OFFLINE=1`.
   - Done when: CI green on push.
 - [ ] **T0.5 Discovery + threat model** · Tool: you, draft with claude.ai
@@ -100,7 +100,7 @@ resolute/
 - [ ] **T1.2 Docs + history corpus with timestamps** · Tool: Claude Code · Model: default
   - Do: clone each repo's docs at the default branch; walk git history to record `first_seen_at` per doc file (git log). Index past issues as documents with `created_at`.
   - Done when: `evals/data/corpus/*.jsonl` exists with `doc_id, repo, path, text, created_at`.
-- [ ] **T1.3 Offline mode + LLM wrapper (minimal)** · Tool: Claude Code · Model: default
+- [x] **T1.3 Offline mode + LLM wrapper (minimal)** · Tool: Claude Code · Model: default
   - Do: `agentcore/llm.py` — `async complete(messages, schema=None, model_tier="small", **kw)` via LiteLLM; structured output → Pydantic; records tokens, latency, cost into `agentcore/cost.py`; `agentcore/offline.py` fixture record/replay keyed by hash(model_tier, messages, schema).
   - Done when: tests cover record, replay, missing-fixture error.
 - [ ] **T1.4 Single-agent baseline** · Tool: Claude Code · Model: default
