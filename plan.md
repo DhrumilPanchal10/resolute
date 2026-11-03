@@ -139,14 +139,14 @@ resolute/
 
 ## Phase 3 — Retrieval with stage-level observability
 
-- [ ] **T3.1 Chunking + embeddings** · Tool: Claude Code · Model: default
+- [x] **T3.1 Chunking + embeddings** · Tool: Claude Code · Model: default
   - Do: chunk docs by heading path (max ~400 tokens, overlap 50); embed locally with `BAAI/bge-small-en-v1.5` on MPS; store in pgvector with `tenant_id, acl_roles, created_at, docs_version`.
-- [ ] **T3.2 Hybrid search** · Tool: Claude Code · Model: default
+- [x] **T3.2 Hybrid search** · Tool: Claude Code · Model: default
   - Do: BM25 (bm25s, persisted per tenant) + dense (pgvector HNSW) → reciprocal rank fusion; ACL + tenant + `created_at < as_of` filters applied INSIDE both queries.
   - Done when: test proves forbidden doc never returned even if top match.
-- [ ] **T3.3 Reranker** · Tool: Claude Code · Model: small
+- [x] **T3.3 Reranker** · Tool: Claude Code · Model: small
   - Do: cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`, top-30 → top-5.
-- [ ] **T3.4 Stage tracing + retrieval eval** · Tool: Claude Code · Model: default
+- [x] **T3.4 Stage tracing + retrieval eval** · Tool: Claude Code · Model: default
   - Do: each stage emits a span with inputs/outputs counts and ids; `evals/retrieval_eval.py` computes Recall@5, MRR, rerank lift on a labelled set of 100 query→doc pairs (label with Gemini-assisted proposals you verify by hand).
   - Done when: `docs/results/retrieval.md` with BM25-only vs hybrid vs hybrid+rerank.
 
