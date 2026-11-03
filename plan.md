@@ -124,13 +124,13 @@ resolute/
 - [ ] **T2.4 Auth + RBAC** · Tool: Claude Code · Model: default
   - Do: `auth.py` — verify Clerk JWTs via JWKS (cached), extract `user_id, tenant_id, role`; roles: `support_engineer, lead, admin, contractor`; `require_role()` FastAPI dependency; permission matrix in one dict.
   - Done when: tests with locally signed test JWTs cover valid, expired, wrong audience, wrong role.
-- [ ] **T2.5 Audit log** · Tool: Claude Code · Model: small
+- [x] **T2.5 Audit log** · Tool: Claude Code · Model: small
   - Do: `audit.py` — append-only insert with `prev_hash` + `hash` (sha256 of row + prev_hash); `verify_chain()`.
   - Done when: tampering test detects a modified row.
 - [x] **T2.6 Guardrails middleware** · Tool: Claude Code · Model: strong (design) then default
   - Do: `guardrails.py` — `@guarded(node_name)` decorator for graph nodes: pre-checks (budget, loop count per ticket, wall clock, injection screen on untrusted text fields), post-checks (schema already enforced, PII masking for spans/logs, citation presence where required); policy per check `warn|block`; blocked node returns state with `errors` appended and `degraded=True`, never raises into the graph. Injection screen v1 = curated patterns + heuristics; interface allows a classifier later.
   - Done when: unit tests for each check; a node that throws yields degraded state, not a crash.
-- [ ] **T2.7 Cache** · Tool: Claude Code · Model: small
+- [x] **T2.7 Cache** · Tool: Claude Code · Model: small
   - Do: `cache.py` — Redis helpers: `get_or_set(key, ttl, fn)`; key builder that ALWAYS includes `tenant_id`, `permission_scope`, `docs_version`.
   - Done when: tests prove different scope → different key.
 - [ ] **T2.8 Memory module** · Tool: Claude Code · Model: default
