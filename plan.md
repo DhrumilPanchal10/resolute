@@ -133,7 +133,7 @@ resolute/
 - [x] **T2.7 Cache** · Tool: Claude Code · Model: small
   - Do: `cache.py` — Redis helpers: `get_or_set(key, ttl, fn)`; key builder that ALWAYS includes `tenant_id`, `permission_scope`, `docs_version`.
   - Done when: tests prove different scope → different key.
-- [ ] **T2.8 Memory module** · Tool: Claude Code · Model: default
+- [x] **T2.8 Memory module** · Tool: Claude Code · Model: default
   - Do: `memory.py` — `ShortTerm` (compaction: summarize thread when > N tokens), `LongTerm` (per-customer facts; `write()` requires `source in {"system_data","verified_outcome"}`), `Episodic` (resolution + outcome, embedding, `expires_at`, `superseded_by`); retrieval by tenant + similarity; nightly `consolidate()` producing known-issue notes.
   - Done when: tests: customer-text source rejected; expired memories not returned; cross-tenant never returned.
 
