@@ -121,7 +121,7 @@ resolute/
 - [x] **T2.3 Database + RLS** · Tool: Claude Code · Model: default
   - Do: `migrations/001_core.sql`: tenants, users, accounts, invoices, tickets, messages, audit_events, memories, approvals; `tenant_id` on every tenant table; enable RLS with policy `tenant_id = current_setting('app.tenant_id')`; `db.py` sets `app.tenant_id` per session.
   - Done when: integration test proves tenant A session cannot read tenant B rows.
-- [ ] **T2.4 Auth + RBAC** · Tool: Claude Code · Model: default
+- [x] **T2.4 Auth + RBAC** · Tool: Claude Code · Model: default
   - Do: `auth.py` — verify Clerk JWTs via JWKS (cached), extract `user_id, tenant_id, role`; roles: `support_engineer, lead, admin, contractor`; `require_role()` FastAPI dependency; permission matrix in one dict.
   - Done when: tests with locally signed test JWTs cover valid, expired, wrong audience, wrong role.
 - [x] **T2.5 Audit log** · Tool: Claude Code · Model: small
