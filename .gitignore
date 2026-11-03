@@ -1,10 +1,52 @@
+# Environment
 .env
-.venv/
+.env.local
+
+# Python
 __pycache__/
-*.pyc
-.mypy_cache/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+.uv/
+
+# uv
+uv.lock
+
+# Testing
 .pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Ruff
 .ruff_cache/
-node_modules/
+
+# Evals data (never commit)
+evals/data/**/*.jsonl
+evals/data/real_issues/
+evals/data/corpus/
+evals/data/overrides/
+evals/results/
+
+# Fixtures (never commit)
+tests/fixtures/llm/
+
+# Node
+apps/web/node_modules/
+apps/web/.next/
+
+# OS
 .DS_Store
-evals/data/
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

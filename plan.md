@@ -78,7 +78,7 @@ resolute/
 
 ## Phase 0 — Foundation
 
-- [ ] **T0.1 Scaffold repo** · Tool: Claude Code · Model: small
+- [x] **T0.1 Scaffold repo** · Tool: Claude Code · Model: small
   - Do: create the layout in §1; `pyproject.toml` with uv (deps: fastapi, uvicorn, pydantic-settings, langgraph, langgraph-checkpoint-postgres, mcp, litellm, psycopg[binary], sqlalchemy, pgvector, redis, opentelemetry-sdk, opentelemetry-exporter-otlp, sentence-transformers, bm25s, httpx, tenacity, pytest, pytest-asyncio, ruff, mypy); Makefile targets `install, up, down, test, lint, eval-smoke, eval-full`; `.env.example`; `.gitignore`.
   - Done when: `make install && make lint && make test` succeeds (empty test passes).
 - [ ] **T0.2 Agent instruction files** · Tool: you (manual)
