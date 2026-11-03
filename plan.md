@@ -94,19 +94,19 @@ resolute/
 
 ## Phase 1 — Data and baseline (first benchmark)
 
-- [ ] **T1.1 Collect real issues** · Tool: Claude Code · Model: default
+- [x] **T1.1 Collect real issues** · Tool: Claude Code · Model: default
   - Do: `scripts/collect_issues.py` uses GitHub REST API (token from `.env`) to pull closed issues/answered discussions from 3 well-documented OSS repos (configurable). Keep issues with a maintainer answer or linked merged PR. Save JSONL: `id, repo, title, body, created_at, closed_at, resolution_text, resolution_url, labels`. Target 300; start with 100.
   - Done when: `evals/data/real_issues/issues.jsonl` has ≥100 rows; unit test validates schema.
-- [ ] **T1.2 Docs + history corpus with timestamps** · Tool: Claude Code · Model: default
+- [x] **T1.2 Docs + history corpus with timestamps** · Tool: Claude Code · Model: default
   - Do: clone each repo's docs at the default branch; walk git history to record `first_seen_at` per doc file (git log). Index past issues as documents with `created_at`.
   - Done when: `evals/data/corpus/*.jsonl` exists with `doc_id, repo, path, text, created_at`.
 - [x] **T1.3 Offline mode + LLM wrapper (minimal)** · Tool: Claude Code · Model: default
   - Do: `agentcore/llm.py` — `async complete(messages, schema=None, model_tier="small", **kw)` via LiteLLM; structured output → Pydantic; records tokens, latency, cost into `agentcore/cost.py`; `agentcore/offline.py` fixture record/replay keyed by hash(model_tier, messages, schema).
   - Done when: tests cover record, replay, missing-fixture error.
-- [ ] **T1.4 Single-agent baseline** · Tool: Claude Code · Model: default
+- [x] **T1.4 Single-agent baseline** · Tool: Claude Code · Model: default
   - Do: `evals/baseline/single_agent.py` — one strong-model agent with two tools (simple keyword search over corpus filtered by `created_at < issue.created_at`, and GitHub issue search with the same time filter). Produces answer + citations for each issue.
   - Done when: runs on 100 issues, writes `evals/results/baseline_<date>.jsonl`.
-- [ ] **T1.5 Judge v0 + first report** · Tool: Claude Code · Model: default
+- [x] **T1.5 Judge v0 + first report** · Tool: Claude Code · Model: default
   - Do: `evals/judge/judge.py` — judge compares answer to `resolution_text`, outputs `{correct: bool, partial: bool, reason}`; `evals/report.py` prints accuracy, tokens/answer, latency, cost/answer.
   - Done when: `docs/results/baseline.md` committed with real numbers. **This is the first benchmark.**
 
