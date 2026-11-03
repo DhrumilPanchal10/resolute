@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./evals/data/**)",
+      "Read(./tests/fixtures/**)",
+      "Read(./apps/web/node_modules/**)",
+      "Read(./**/*.jsonl)"
+    ]
+  }
+}
