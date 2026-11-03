@@ -127,7 +127,7 @@ resolute/
 - [ ] **T2.5 Audit log** · Tool: Claude Code · Model: small
   - Do: `audit.py` — append-only insert with `prev_hash` + `hash` (sha256 of row + prev_hash); `verify_chain()`.
   - Done when: tampering test detects a modified row.
-- [ ] **T2.6 Guardrails middleware** · Tool: Claude Code · Model: strong (design) then default
+- [x] **T2.6 Guardrails middleware** · Tool: Claude Code · Model: strong (design) then default
   - Do: `guardrails.py` — `@guarded(node_name)` decorator for graph nodes: pre-checks (budget, loop count per ticket, wall clock, injection screen on untrusted text fields), post-checks (schema already enforced, PII masking for spans/logs, citation presence where required); policy per check `warn|block`; blocked node returns state with `errors` appended and `degraded=True`, never raises into the graph. Injection screen v1 = curated patterns + heuristics; interface allows a classifier later.
   - Done when: unit tests for each check; a node that throws yields degraded state, not a crash.
 - [ ] **T2.7 Cache** · Tool: Claude Code · Model: small
