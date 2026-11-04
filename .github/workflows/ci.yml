@@ -27,3 +27,6 @@ jobs:
 
       - name: Test
         run: uv run pytest
+
+      - name: Eval gate
+        run: uv run python evals/report.py

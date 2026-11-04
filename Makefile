@@ -1,4 +1,4 @@
-.PHONY: install up down test lint eval-smoke eval-full demo
+.PHONY: install up down test lint eval-smoke eval-full eval-report demo
 
 install:
 	uv sync --group dev --no-cache
@@ -22,6 +22,9 @@ eval-smoke:
 
 eval-full:
 	uv run python evals/run.py
+
+eval-report:
+	OFFLINE=1 uv run python evals/report.py
 
 demo:
 	OFFLINE=1 uv run python -m resolute.graph.build --demo

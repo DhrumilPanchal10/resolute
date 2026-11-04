@@ -169,66 +169,29 @@ class TestVerdictSchema:
 
 
 class TestReportGeneration:
-    def _make_files(self, tmp_path: Path) -> tuple[Path, Path, Path]:
-        results_path = tmp_path / "baseline_20260101.jsonl"
-        judged_path = tmp_path / "judged_20260101.jsonl"
-        issues_path = tmp_path / "issues.jsonl"
+    def test_check_gate_all_pass(self) -> None:
+        from evals.report import check_gate, load_thresholds
 
-        import json
+        t = load_thresholds()
+        ma = {"triage_rate": 1.0, "reply_rate": 1.0}
+        sc = {"pass_at_1": 0.5, "pass_at_k": 0.5}
+        adv = {"asr": 0.0, "benign_success_rate": 1.0}
+        results = check_gate(ma, sc, adv, t)
+        assert all(ok for _, ok, _ in results)
 
-        # 3 baseline rows
-        for i in range(3):
-            row = {
-                "issue_id": f"repo#10{i}",
-                "answer": f"answer {i}",
-                "citations": [],
-                "input_tokens": 100,
-                "output_tokens": 50,
-                "cost_usd": 0.001,
-                "latency_ms": 500.0,
-            }
-            with results_path.open("a") as f:
-                f.write(json.dumps(row) + "\n")
+    def test_generate_summary_has_tables(self) -> None:
+        from evals.report import generate_summary, load_thresholds
 
-        for i, (correct, partial) in enumerate([(True, False), (False, True), (False, False)]):
-            row = {
-                "issue_id": f"repo#10{i}",
-                "correct": correct,
-                "partial": partial,
-                "reason": f"reason {i}",
-            }
-            with judged_path.open("a") as f:
-                f.write(json.dumps(row) + "\n")
-
-        for i in range(3):
-            row = {
-                "id": f"repo#10{i}",
-                "repo": "repo",
-                "title": f"Issue {i}",
-                "body": "body",
-                "created_at": "2026-01-01T00:00:00Z",
-                "closed_at": "2026-01-02T00:00:00Z",
-                "resolution_text": f"fix {i}",
-                "resolution_url": "https://example.com",
-                "labels": [],
-            }
-            with issues_path.open("a") as f:
-                f.write(json.dumps(row) + "\n")
-
-        return results_path, judged_path, issues_path
-
-    def test_report_contains_accuracy(self, tmp_path: Path) -> None:
-        from evals.report import generate
-
-        rp, jp, ip = self._make_files(tmp_path)
-        md = generate(rp, jp, ip)
-        assert "Accuracy" in md
-        assert "1/3" in md  # 1 correct out of 3
-
-    def test_report_contains_efficiency(self, tmp_path: Path) -> None:
-        from evals.report import generate
-
-        rp, jp, ip = self._make_files(tmp_path)
-        md = generate(rp, jp, ip)
-        assert "tokens" in md.lower()
+        t = load_thresholds()
+        ma = {"n": 5, "triage_rate": 1.0, "reply_rate": 1.0, "avg_latency_ms": 50}
+        sc = {"n": 10, "pass_at_1": 0.3, "pass_at_k": 0.3}
+        adv = {
+            "total_injected": 5, "total_benign": 5,
+            "injected_blocked": 5, "injected_leaked": 0,
+            "asr": 0.0, "benign_answered": 5, "benign_success_rate": 1.0,
+        }
+        gate = [("test", True, "ok")]
+        md = generate_summary(ma, sc, adv, t, gate)
+        assert "Evaluation Summary" in md
         assert "latency" in md.lower()
+        assert "ASR" in md

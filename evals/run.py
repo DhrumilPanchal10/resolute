@@ -353,6 +353,23 @@ async def run(
     return rows
 
 
+async def run_eval(limit: int | None = None) -> list[MultiAgentRow]:
+    """Thin wrapper for the report runner — runs smoke issues with optional limit."""
+    issues = SMOKE_ISSUES[:limit] if limit else SMOKE_ISSUES
+    if is_offline():
+        _install_fake_complete()
+    try:
+        graph = build_graph()
+        rows: list[MultiAgentRow] = []
+        for issue in issues:
+            row = await run_issue(graph, issue)
+            rows.append(row)
+    finally:
+        if is_offline():
+            _set_complete_fn(None)
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--issues", default=str(ISSUES_PATH))

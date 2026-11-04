@@ -188,7 +188,7 @@ resolute/
 - [ ] **T7.2 Judge calibration** · Tool: you + Claude Code · Model: small — hand-label 50 answers; compute judge agreement; adjust rubric until ≥85%; save `docs/results/judge_calibration.md`.
 - [x] **T7.3 Action scenarios + simulated customer** · Tool: Claude Code · Model: default — 100 YAML scenarios with expected final DB/Stripe state; simulated customer LLM answers from hidden facts; runner computes pass^1 and pass^k (k configurable, default 3 for free tier).
 - [x] **T7.4 Adversarial suite** · Tool: Claude Code · Model: default — 150 injected tickets + 100 benign; ASR and benign success with guardrails on vs off.
-- [ ] **T7.5 Report + CI gate** · Tool: Claude Code · Model: small — `evals/report.py` → markdown tables; CI runs 40-case offline smoke subset; fails if metrics drop below thresholds in `evals/thresholds.yaml`.
+- [x] **T7.5 Report + CI gate** · Tool: Claude Code · Model: small — `evals/report.py` → markdown tables; CI runs 40-case offline smoke subset; fails if metrics drop below thresholds in `evals/thresholds.yaml`.
   - Done when: `docs/results/summary.md` has all metrics vs baseline.
 
 ## Phase 8 — Reliability, caching and cost
