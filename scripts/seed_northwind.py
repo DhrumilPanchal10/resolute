@@ -15,10 +15,16 @@ import asyncio
 import random
 import string
 import sys
+import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
+
+TENANT_NAMES = ["Northwind Corp", "Acme Inc"]
+PLANS = ["starter", "pro", "enterprise"]
+MRR_BY_PLAN = {"starter": 49.0, "pro": 199.0, "enterprise": 999.0}
+INVOICE_STATUSES = ["open", "paid", "paid", "paid", "void"]  # mostly paid
 
 
 def _rand_str(n: int = 8) -> str:
@@ -28,76 +34,73 @@ def _rand_str(n: int = 8) -> str:
 async def run(tenants: int, accounts_per_tenant: int) -> None:
     import os
 
-    from dotenv import load_dotenv
     import psycopg
+    from dotenv import load_dotenv
 
     load_dotenv(ROOT / ".env")
     dsn = os.environ.get("DATABASE_URL", "")
     if not dsn:
         sys.exit("DATABASE_URL is not set — add it to .env")
 
-    # psycopg async connection
     conn_dsn = dsn.replace("postgresql+psycopg://", "postgresql://")
-    async with await psycopg.AsyncConnection.connect(conn_dsn) as conn:
-        async with conn.cursor() as cur:
+    async with await psycopg.AsyncConnection.connect(conn_dsn, autocommit=False) as conn, conn.cursor() as cur:
             for t_idx in range(tenants):
-                tenant_id = f"tenant-{_rand_str(6)}"
-                print(f"Seeding tenant {tenant_id}…")
+                tenant_id = str(uuid.uuid4())
+                tenant_name = TENANT_NAMES[t_idx] if t_idx < len(TENANT_NAMES) else f"Tenant {t_idx + 1}"
+                print(f"Seeding tenant {tenant_name} ({tenant_id})…")
 
-                # Insert tenant
                 await cur.execute(
                     "INSERT INTO tenants (id, name) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-                    (tenant_id, f"Northwind Corp {t_idx + 1}"),
+                    (tenant_id, tenant_name),
                 )
 
                 for a_idx in range(accounts_per_tenant):
-                    account_id = f"acct-{_rand_str(8)}"
-                    plan = random.choice(["starter", "pro", "enterprise"])
+                    account_id = str(uuid.uuid4())
+                    plan = random.choice(PLANS)
+                    mrr = MRR_BY_PLAN[plan]
+                    created_at = datetime.now(UTC) - timedelta(days=random.randint(30, 730))
+
                     await cur.execute(
-                        "INSERT INTO accounts (id, tenant_id, name, plan, created_at)"
-                        " VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
+                        "INSERT INTO accounts (id, tenant_id, name, email, plan, mrr_usd, created_at)"
+                        " VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
                         (
                             account_id,
                             tenant_id,
-                            f"Customer {a_idx + 1}",
+                            f"{tenant_name} Customer {a_idx + 1}",
+                            f"customer{a_idx + 1}@{_rand_str(6)}.example.com",
                             plan,
-                            datetime.now(UTC) - timedelta(days=random.randint(1, 365)),
+                            mrr,
+                            created_at,
                         ),
                     )
 
-                    # 1-3 invoices per account
-                    for _ in range(random.randint(1, 3)):
-                        inv_id = f"inv-{_rand_str(8)}"
-                        amount = round(random.uniform(49.0, 999.0), 2)
+                    # 2–5 invoices per account
+                    for inv_idx in range(random.randint(2, 5)):
+                        inv_id = str(uuid.uuid4())
+                        amount = round(mrr * random.uniform(0.9, 1.1), 2)
+                        status = random.choice(INVOICE_STATUSES)
+                        issued_at = created_at + timedelta(days=30 * inv_idx)
+                        due_at = issued_at + timedelta(days=30)
+                        paid_at = issued_at + timedelta(days=random.randint(1, 25)) if status == "paid" else None
+
                         await cur.execute(
-                            "INSERT INTO invoices (id, account_id, tenant_id, amount_usd, status, created_at)"
-                            " VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
+                            "INSERT INTO invoices"
+                            " (id, tenant_id, account_id, amount_usd, status, issued_at, due_at, paid_at)"
+                            " VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
                             (
                                 inv_id,
-                                account_id,
                                 tenant_id,
+                                account_id,
                                 amount,
-                                random.choice(["paid", "unpaid", "overdue"]),
-                                datetime.now(UTC) - timedelta(days=random.randint(0, 90)),
-                            ),
-                        )
-
-                    # 2-5 log entries per account
-                    for _ in range(random.randint(2, 5)):
-                        await cur.execute(
-                            "INSERT INTO logs (account_id, tenant_id, level, message, occurred_at)"
-                            " VALUES (%s, %s, %s, %s, %s)",
-                            (
-                                account_id,
-                                tenant_id,
-                                random.choice(["INFO", "WARN", "ERROR"]),
-                                f"Synthetic log entry for {account_id}",
-                                datetime.now(UTC) - timedelta(minutes=random.randint(0, 10080)),
+                                status,
+                                issued_at,
+                                due_at,
+                                paid_at,
                             ),
                         )
 
                 await conn.commit()
-                print(f"  → {accounts_per_tenant} accounts seeded for {tenant_id}")
+                print(f"  → {accounts_per_tenant} accounts seeded for {tenant_name}")
 
     print("Done.")
 
