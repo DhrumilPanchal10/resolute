@@ -163,17 +163,17 @@ resolute/
 
 ## Phase 5 — Agents and orchestration
 
-- [ ] **T5.1 State** · Tool: Claude Code · Model: strong
+- [x] **T5.1 State** · Tool: Claude Code · Model: strong
   - Do: `graph/state.py` TypedDict with `Annotated[list, operator.add]` reducers for `findings`, `evidence`, `errors`, `tool_calls`; fields for ticket, triage, plan, draft, actions, verification, revision_count, budget, route.
-- [ ] **T5.2 Triage agent** · Tool: Claude Code · Model: small · small model — category, severity, tier, injection_risk, out_of_scope.
-- [ ] **T5.3 Knowledge agent** · Tool: Claude Code · Model: small — calls docs server + episodic memory; returns evidence list with citations.
-- [ ] **T5.4 Investigator agent** · Tool: Claude Code · Model: default — bounded ReAct (max 6 tool calls) over accounts, logs, github; returns findings with source ids.
-- [ ] **T5.5 Resolver agent** · Tool: Claude Code · Model: default — reply draft + `ActionPlan(list[Action])`, every claim tagged with evidence ids.
-- [ ] **T5.6 Verifier agent** · Tool: Claude Code · Model: default — checks claims↔evidence, action args provenance (args must match values seen in tool outputs, not ticket text), policy (`hitl/policies.py`); returns `pass|revise|escalate` + issues.
-- [ ] **T5.7 Supervisor + graph build** · Tool: Claude Code · Model: strong
+- [x] **T5.2 Triage agent** · Tool: Claude Code · Model: small · small model — category, severity, tier, injection_risk, out_of_scope.
+- [x] **T5.3 Knowledge agent** · Tool: Claude Code · Model: small — calls docs server + episodic memory; returns evidence list with citations.
+- [x] **T5.4 Investigator agent** · Tool: Claude Code · Model: default — bounded ReAct (max 6 tool calls) over accounts, logs, github; returns findings with source ids.
+- [x] **T5.5 Resolver agent** · Tool: Claude Code · Model: default — reply draft + `ActionPlan(list[Action])`, every claim tagged with evidence ids.
+- [x] **T5.6 Verifier agent** · Tool: Claude Code · Model: default — checks claims↔evidence, action args provenance (args must match values seen in tool outputs, not ticket text), policy (`hitl/policies.py`); returns `pass|revise|escalate` + issues.
+- [x] **T5.7 Supervisor + graph build** · Tool: Claude Code · Model: strong
   - Do: `graph/build.py`: triage → conditional (exit to human if abusive/out_of_scope) → `Send()` fan-out to knowledge ∥ investigator → resolver → verifier → conditional (revise ≤2 / approval interrupt / auto-send / escalate). Postgres checkpointer (`AsyncPostgresSaver`). `interrupt()` for approvals and customer replies. All nodes wrapped by `@guarded`.
   - Done when: `make demo` runs 3 sample tickets offline end to end; killing the process mid-run and re-invoking with the same thread id resumes.
-- [ ] **T5.8 Wire memory** · Tool: Claude Code · Model: small — short-term compaction in resolver input; episodic write on verified outcome event only.
+- [x] **T5.8 Wire memory** · Tool: Claude Code · Model: small — short-term compaction in resolver input; episodic write on verified outcome event only.
 
 ## Phase 6 — API, HITL and UI
 

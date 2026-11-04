@@ -1,4 +1,5 @@
 import time
+from collections.abc import Callable
 from typing import Any
 
 import litellm
@@ -16,6 +17,24 @@ from agentcore.errors import BudgetExceeded
 from agentcore.offline import is_offline, load_fixture, save_fixture
 from agentcore.routing import Route, routes_for_tier
 from resolute.config import settings
+
+# ---------------------------------------------------------------------------
+# Test / demo override hook
+# ---------------------------------------------------------------------------
+
+_complete_override: Callable[..., Any] | None = None
+
+
+def _set_complete_fn(fn: Callable[..., Any] | None) -> None:
+    """Inject a replacement for `complete()` — used in tests and the demo.
+
+    When set, `complete()` delegates entirely to `fn(messages, schema, **kwargs)`
+    and skips all routing, retries, budget checks, and fixture I/O.
+    Call with `None` to restore normal behaviour.
+    """
+    global _complete_override
+    _complete_override = fn
+
 
 # Suppress litellm's default verbose logging
 litellm.suppress_debug_info = True
@@ -66,6 +85,9 @@ async def complete(
     - Raises BudgetExceeded before any call that would exceed settings.budget_usd_max.
     - Auto-saves each live response as a fixture for future offline replay.
     """
+    if _complete_override is not None:
+        return await _complete_override(messages, schema=schema, model_tier=model_tier, **kwargs)
+
     tracker = run_cost if run_cost is not None else RunCost()
     schema_name = schema.__name__ if schema is not None else None
 
