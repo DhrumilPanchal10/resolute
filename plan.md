@@ -152,7 +152,7 @@ resolute/
 
 ## Phase 4 — MCP tool servers
 
-- [ ] **T4.1 MCP server base** · Tool: Claude Code · Model: strong (design) then default
+- [x] **T4.1 MCP server base** · Tool: Claude Code · Model: strong (design) then default
   - Do: shared FastMCP wrapper: verify caller JWT, resolve per-user delegated credentials, check RBAC permission for tool, write audit event, emit `span_tool`, timeout + circuit breaker; tools declare `risk: read|write|destructive`.
 - [ ] **T4.2 docs server** · Tool: Claude Code · Model: small — `search_docs(query, k)` using Phase 3.
 - [ ] **T4.3 accounts server** · Tool: Claude Code · Model: small — `get_account`, `get_invoices`, `get_usage` over Postgres (RLS); `scripts/seed_northwind.py` seeds 2 tenants × 30 accounts, invoices, synthetic logs.
