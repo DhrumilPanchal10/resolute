@@ -193,7 +193,7 @@ resolute/
 
 ## Phase 8 — Reliability, caching and cost
 
-- [ ] **T8.1 Fault injection** · Tool: Claude Code — kill worker mid-run, inject tool 500/429, duplicate approval events; assert exactly-once Stripe actions and correct final state.
+- [x] **T8.1 Fault injection** · Tool: Claude Code — kill worker mid-run, inject tool 500/429, duplicate approval events; assert exactly-once Stripe actions and correct final state.
 - [ ] **T8.2 Semantic cache** · Tool: Claude Code — cache documentation-answerable replies keyed by tenant + permission scope + docs_version + normalized query embedding (threshold); measure hit rate and error rate of cached answers.
 - [ ] **T8.3 Prompt caching + routing tuning** · Tool: Claude Code — stable prefixes first in prompts; route triage/knowledge to small model; measure cost per resolved ticket before/after.
 - [ ] **T8.4 Load test** · Tool: Claude Code · Model: small — k6 script against API with recorded tickets in OFFLINE latency-simulation mode + one small live run; p95 first-token latency.
