@@ -30,6 +30,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from resolute.api.routes_approvals import router as approvals_router
 from resolute.api.routes_tickets import router as tickets_router
@@ -72,6 +73,13 @@ def create_app(
         description="Multi-agent customer support resolution platform",
         version="0.1.0",
         lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:3000"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     app.include_router(tickets_router, prefix="/tickets", tags=["tickets"])
     app.include_router(approvals_router, prefix="/approvals", tags=["approvals"])

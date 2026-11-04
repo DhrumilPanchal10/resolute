@@ -50,6 +50,12 @@ class TicketStore:
     def get(self, ticket_id: str) -> TicketRecord | None:
         return self._records.get(ticket_id)
 
+    def list(self, tenant_id: str | None = None) -> list[TicketRecord]:
+        records = list(self._records.values())
+        if tenant_id:
+            records = [r for r in records if r.tenant_id == tenant_id]
+        return records
+
     def update_status(self, ticket_id: str, status: str) -> None:
         rec = self._records.get(ticket_id)
         if rec:

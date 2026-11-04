@@ -34,6 +34,30 @@ def _bus(request: Request) -> Any:
     return request.app.state.bus
 
 
+@router.get("", response_model=list[TicketStatus])
+async def list_tickets(request: Request, tenant_id: str = "") -> list[TicketStatus]:
+    store = _store(request)
+    records = store.list(tenant_id=tenant_id or None)
+    result: list[TicketStatus] = []
+    for rec in records:
+        fs = rec.final_state or {}
+        result.append(
+            TicketStatus(
+                ticket_id=rec.ticket_id,
+                tenant_id=rec.tenant_id,
+                status=rec.status,
+                triage=fs.get("triage"),
+                draft=fs.get("draft"),
+                final_reply=fs.get("final_reply"),
+                findings_count=len(fs.get("findings") or []),
+                evidence_count=len(fs.get("evidence") or []),
+                errors=list(fs.get("errors") or rec.errors),
+                interrupt_payload=rec.interrupt_payload,
+            )
+        )
+    return result
+
+
 @router.post("", response_model=TicketStatus, status_code=201)
 async def create_ticket(body: TicketCreate, request: Request) -> TicketStatus:
     ticket_id = str(uuid.uuid4())
