@@ -184,7 +184,7 @@ resolute/
 
 ## Phase 7 — Evaluation suite
 
-- [ ] **T7.1 Multi-agent run on real issues** · Tool: Claude Code — run graph on the same 100 issues (time-travelled), compare to baseline.
+- [x] **T7.1 Multi-agent run on real issues** · Tool: Claude Code — run graph on the same 100 issues (time-travelled), compare to baseline.
 - [ ] **T7.2 Judge calibration** · Tool: you + Claude Code · Model: small — hand-label 50 answers; compute judge agreement; adjust rubric until ≥85%; save `docs/results/judge_calibration.md`.
 - [ ] **T7.3 Action scenarios + simulated customer** · Tool: Claude Code · Model: default — 100 YAML scenarios with expected final DB/Stripe state; simulated customer LLM answers from hidden facts; runner computes pass^1 and pass^k (k configurable, default 3 for free tier).
 - [ ] **T7.4 Adversarial suite** · Tool: Claude Code · Model: default — 150 injected tickets + 100 benign; ASR and benign success with guardrails on vs off.

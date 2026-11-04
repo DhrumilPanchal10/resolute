@@ -18,10 +18,10 @@ lint:
 	uv run mypy src/
 
 eval-smoke:
-	OFFLINE=1 uv run python evals/run.py --smoke
+	OFFLINE=1 uv run python evals/run.py
 
 eval-full:
-	uv run python evals/run.py --full
+	uv run python evals/run.py
 
 demo:
 	OFFLINE=1 uv run python -m resolute.graph.build --demo
