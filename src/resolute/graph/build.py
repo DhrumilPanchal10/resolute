@@ -128,6 +128,29 @@ async def execute_actions_node(state: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
+async def wait_for_customer_reply_node(state: dict[str, Any]) -> dict[str, Any]:
+    """Interrupt after a reply is sent; resume when the customer replies back.
+
+    Resume value: {"text": "<customer reply text>"}
+    """
+    reply = interrupt(
+        {
+            "type": "awaiting_customer_reply",
+            "ticket_id": state["ticket_id"],
+            "final_reply": state.get("final_reply", ""),
+        }
+    )
+    text = reply.get("text", "") if isinstance(reply, dict) else str(reply)
+    return {
+        "ticket_text": text,
+        "triage": None,
+        "draft": None,
+        "actions": None,
+        "verification": None,
+        "revision_count": 0,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Graph builder
 # ---------------------------------------------------------------------------
@@ -156,6 +179,7 @@ def build_graph(checkpointer: Any = None) -> Any:
     sg.add_node("send_reply", send_reply_node)
     sg.add_node("escalate", escalate_node)
     sg.add_node("execute_actions", execute_actions_node)
+    sg.add_node("wait_for_customer_reply", wait_for_customer_reply_node)
 
     # START → triage
     sg.add_edge(START, "triage")
@@ -187,7 +211,9 @@ def build_graph(checkpointer: Any = None) -> Any:
     )
     sg.add_edge("send_reply", "execute_actions")
     sg.add_edge("approval_interrupt", "execute_actions")
-    sg.add_edge("execute_actions", END)
+    sg.add_edge("execute_actions", "wait_for_customer_reply")
+    # wait_for_customer_reply loops back to triage for multi-turn conversations
+    sg.add_edge("wait_for_customer_reply", "triage")
     sg.add_edge("escalate", END)
 
     return sg.compile(checkpointer=checkpointer, interrupt_before=["approval_interrupt"])
