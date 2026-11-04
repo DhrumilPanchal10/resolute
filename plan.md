@@ -178,7 +178,7 @@ resolute/
 ## Phase 6 — API, HITL and UI
 
 - [x] **T6.1 API** · Tool: Claude Code · Model: default — `POST /tickets`, `GET /tickets/{id}`, `GET /tickets/{id}/stream` (SSE of node events), `POST /approvals/{id}` (approve/reject/edit → resumes graph), `POST /tickets/{id}/reply` (customer reply → resumes).
-- [ ] **T6.2 HITL policies + queue** · Tool: Claude Code · Model: small — policy table (refund > threshold, config change, ownership change → lead approval); queue ordered by severity, tier, age; overrides saved to `evals/data/overrides/`.
+- [x] **T6.2 HITL policies + queue** · Tool: Claude Code · Model: small — policy table (refund > threshold, config change, ownership change → lead approval); queue ordered by severity, tier, age; overrides saved to `evals/data/overrides/`.
 - [ ] **T6.3 Next.js app** · Tool: Claude Code · Model: default — Clerk auth; pages: inbox, ticket workspace (streams steps, evidence panel with citations, proposed actions), approval queue, admin metrics. Tailwind + shadcn/ui.
   - Done when: full flow clickable locally.
 
