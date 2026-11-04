@@ -1,0 +1,1070 @@
+# Action Scenarios for Resolute Evaluation
+# 100 scenarios across billing, auth, performance, config, and other categories.
+# Each scenario specifies ticket text, expected triage, expected actions, and reply checks.
+
+# =============================================================================
+# BILLING — 30 scenarios
+# =============================================================================
+
+- id: billing-001
+  title: Duplicate charge on Pro plan
+  category: billing
+  severity: high
+  ticket_text: "I was charged twice for my Pro plan last month. Invoice INV-2024-001 shows $199 but I see two charges."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["refund", "duplicate"]
+    actions:
+      - action_type: refund_invoice
+        should_occur: true
+  tags: [happy_path, refund]
+
+- id: billing-002
+  title: Wrong amount on invoice
+  category: billing
+  severity: medium
+  ticket_text: "My latest invoice shows $299 but I'm on the Starter plan which is $49/month."
+  expected:
+    triage_category: billing
+    reply_contains: ["invoice", "amount"]
+  tags: [billing_error]
+
+- id: billing-003
+  title: Request full refund after cancellation
+  category: billing
+  severity: high
+  ticket_text: "I cancelled my subscription 3 days ago but was still charged. I want a full refund."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["refund"]
+    actions:
+      - action_type: refund_invoice
+        should_occur: true
+  tags: [refund, cancellation]
+
+- id: billing-004
+  title: Credit card declined
+  category: billing
+  severity: medium
+  ticket_text: "My payment keeps failing. I updated my card details but still getting 'payment declined'."
+  expected:
+    triage_category: billing
+    reply_contains: ["payment", "card"]
+  tags: [payment]
+
+- id: billing-005
+  title: Promo code not applied
+  category: billing
+  severity: low
+  ticket_text: "I used promo code SAVE20 during signup but my invoice doesn't show the discount."
+  expected:
+    triage_category: billing
+    triage_severity: low
+    reply_contains: ["promo", "discount"]
+    actions:
+      - action_type: issue_credit
+        should_occur: true
+  tags: [promo, credit]
+
+- id: billing-006
+  title: Annual vs monthly billing confusion
+  category: billing
+  severity: low
+  ticket_text: "I thought I signed up for annual billing but I'm being charged monthly. Can you switch me?"
+  expected:
+    triage_category: billing
+    reply_contains: ["billing", "annual"]
+  tags: [billing_change]
+
+- id: billing-007
+  title: VAT not shown on invoice
+  category: billing
+  severity: low
+  ticket_text: "Our company is in Germany and we need VAT on our invoices for tax compliance."
+  expected:
+    triage_category: billing
+    reply_contains: ["VAT", "invoice"]
+  tags: [tax]
+
+- id: billing-008
+  title: Unexpected charge after downgrade
+  category: billing
+  severity: high
+  ticket_text: "I downgraded from Pro to Starter last week but was just charged the Pro price again."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["downgrade", "charge"]
+  tags: [downgrade, billing_error]
+
+- id: billing-009
+  title: Request invoice PDF
+  category: billing
+  severity: low
+  ticket_text: "Can you send me a PDF copy of invoice INV-2024-042? I need it for our records."
+  expected:
+    triage_category: billing
+    triage_severity: low
+    reply_contains: ["invoice"]
+  tags: [simple]
+
+- id: billing-010
+  title: Multiple team members charged separately
+  category: billing
+  severity: medium
+  ticket_text: "We have a team plan but each member is being charged individually. We should have one consolidated bill."
+  expected:
+    triage_category: billing
+    reply_contains: ["team", "billing"]
+  tags: [team, billing_error]
+
+- id: billing-011
+  title: Free trial expired without warning
+  category: billing
+  severity: medium
+  ticket_text: "My free trial ended and I was auto-charged without any warning email. I want to cancel and get a refund."
+  expected:
+    triage_category: billing
+    reply_contains: ["trial", "refund"]
+  tags: [trial, refund]
+
+- id: billing-012
+  title: Currency conversion fees
+  category: billing
+  severity: low
+  ticket_text: "I'm in Japan and my bank is charging currency conversion fees. Do you support JPY billing?"
+  expected:
+    triage_category: billing
+    reply_contains: ["currency"]
+  tags: [international]
+
+- id: billing-013
+  title: Enterprise discount not applied
+  category: billing
+  severity: high
+  ticket_text: "We signed an enterprise agreement for $5000/year but the system is charging us $999/month."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["enterprise", "agreement"]
+  tags: [enterprise, billing_error]
+
+- id: billing-014
+  title: Refund for service outage
+  category: billing
+  severity: high
+  ticket_text: "Your service was down for 8 hours yesterday during our peak traffic. We want compensation."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["outage"]
+    actions:
+      - action_type: issue_credit
+        should_occur: true
+  tags: [outage, credit]
+
+- id: billing-015
+  title: Add purchase order number to invoice
+  category: billing
+  severity: low
+  ticket_text: "We need PO number PO-2024-1234 added to all our future invoices for procurement tracking."
+  expected:
+    triage_category: billing
+    reply_contains: ["PO", "invoice"]
+  tags: [simple]
+
+- id: billing-016
+  title: Overage charges unclear
+  category: billing
+  severity: medium
+  ticket_text: "I see $47 in overage charges on my bill. What usage caused this? I thought I had unlimited requests."
+  expected:
+    triage_category: billing
+    reply_contains: ["overage", "usage"]
+  tags: [overage]
+
+- id: billing-017
+  title: Subscription auto-renewed unwanted
+  category: billing
+  severity: medium
+  ticket_text: "My annual subscription auto-renewed for another year. I didn't want to continue. Please cancel and refund."
+  expected:
+    triage_category: billing
+    reply_contains: ["renewal", "refund"]
+  tags: [renewal, refund]
+
+- id: billing-018
+  title: Student discount request
+  category: billing
+  severity: low
+  ticket_text: "I'm a university student. Do you offer educational discounts? I'd like to use the Pro plan for my thesis project."
+  expected:
+    triage_category: billing
+    triage_severity: low
+    reply_contains: ["student"]
+  tags: [discount]
+
+- id: billing-019
+  title: Charge for deleted account
+  category: billing
+  severity: high
+  ticket_text: "I deleted my account 2 months ago but I'm still being charged monthly. This is unacceptable."
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["account", "charge"]
+    actions:
+      - action_type: refund_invoice
+        should_occur: true
+  tags: [deletion, refund]
+
+- id: billing-020
+  title: Nonprofit discount
+  category: billing
+  severity: low
+  ticket_text: "We're a registered 501(c)(3) nonprofit. Do you offer discounted pricing for nonprofits?"
+  expected:
+    triage_category: billing
+    reply_contains: ["nonprofit"]
+  tags: [discount]
+
+- id: billing-021
+  title: Split billing between departments
+  category: billing
+  severity: low
+  ticket_text: "Can we split our billing between two departments? Engineering and marketing each have their own budget codes."
+  expected:
+    triage_category: billing
+    reply_contains: ["billing"]
+  tags: [enterprise]
+
+- id: billing-022
+  title: Charge dispute from bank
+  category: billing
+  severity: high
+  ticket_text: "My bank filed a chargeback for your last two invoices because I reported them as unauthorized. But I do use your service. How do we fix this?"
+  expected:
+    triage_category: billing
+    triage_severity: high
+    reply_contains: ["chargeback"]
+  tags: [chargeback]
+
+- id: billing-023
+  title: Volume discount inquiry
+  category: billing
+  severity: low
+  ticket_text: "We're scaling to 500 seats. What volume discounts are available at that level?"
+  expected:
+    triage_category: billing
+    reply_contains: ["volume", "discount"]
+  tags: [enterprise, discount]
+
+- id: billing-024
+  title: Marketplace purchase not reflected
+  category: billing
+  severity: medium
+  ticket_text: "I purchased your service through AWS Marketplace but my account still shows as free tier."
+  expected:
+    triage_category: billing
+    reply_contains: ["marketplace"]
+  tags: [marketplace]
+
+- id: billing-025
+  title: Tax exemption certificate
+  category: billing
+  severity: low
+  ticket_text: "We have a tax exemption certificate. How do I submit it so we're not charged sales tax?"
+  expected:
+    triage_category: billing
+    reply_contains: ["tax"]
+  tags: [tax]
+
+- id: billing-026
+  title: Retroactive plan upgrade credit
+  category: billing
+  severity: medium
+  ticket_text: "I upgraded mid-cycle. Can I get a prorated credit for the unused days on my old plan?"
+  expected:
+    triage_category: billing
+    reply_contains: ["prorated", "credit"]
+  tags: [upgrade, credit]
+
+- id: billing-027
+  title: Wire transfer payment
+  category: billing
+  severity: low
+  ticket_text: "We can only pay via wire transfer. Do you support that? If so, what are the bank details?"
+  expected:
+    triage_category: billing
+    reply_contains: ["wire", "transfer"]
+  tags: [payment]
+
+- id: billing-028
+  title: Credit memo request
+  category: billing
+  severity: medium
+  ticket_text: "We need a credit memo for the service disruption on Oct 15. Our finance team requires formal documentation."
+  expected:
+    triage_category: billing
+    reply_contains: ["credit"]
+    actions:
+      - action_type: issue_credit
+        should_occur: true
+  tags: [credit]
+
+- id: billing-029
+  title: Partner referral credit
+  category: billing
+  severity: low
+  ticket_text: "We referred 3 customers through the partner program. When do we receive our referral credits?"
+  expected:
+    triage_category: billing
+    reply_contains: ["referral", "credit"]
+  tags: [partner]
+
+- id: billing-030
+  title: Billing address change
+  category: billing
+  severity: low
+  ticket_text: "We moved offices. Please update our billing address to 123 New Street, San Francisco, CA 94105."
+  expected:
+    triage_category: billing
+    reply_contains: ["address"]
+  tags: [simple]
+
+# =============================================================================
+# AUTH — 20 scenarios
+# =============================================================================
+
+- id: auth-001
+  title: 401 after deploy
+  category: auth
+  severity: critical
+  ticket_text: "Can't log in since the last deploy. Getting 401 Unauthorized every time. This is blocking our entire team."
+  expected:
+    triage_category: auth
+    triage_severity: critical
+    reply_contains: ["401", "authentication"]
+  tags: [critical, deploy]
+
+- id: auth-002
+  title: SSO not working
+  category: auth
+  severity: high
+  ticket_text: "Our Okta SSO integration stopped working this morning. Users get redirected to an error page."
+  expected:
+    triage_category: auth
+    triage_severity: high
+    reply_contains: ["SSO"]
+  tags: [sso]
+
+- id: auth-003
+  title: Password reset email not received
+  category: auth
+  severity: medium
+  ticket_text: "I requested a password reset 30 minutes ago but haven't received the email. Checked spam too."
+  expected:
+    triage_category: auth
+    reply_contains: ["password", "reset"]
+  tags: [password]
+
+- id: auth-004
+  title: API key compromised
+  category: auth
+  severity: critical
+  ticket_text: "We accidentally committed our API key to a public GitHub repo. We need it rotated immediately."
+  expected:
+    triage_category: auth
+    triage_severity: critical
+    reply_contains: ["API key", "rotate"]
+    should_escalate: false
+  tags: [critical, security]
+
+- id: auth-005
+  title: MFA locked out
+  category: auth
+  severity: high
+  ticket_text: "I lost my phone with the authenticator app. I can't log in with MFA. Need to disable it temporarily."
+  expected:
+    triage_category: auth
+    reply_contains: ["MFA"]
+  tags: [mfa]
+
+- id: auth-006
+  title: OAuth scope insufficient
+  category: auth
+  severity: medium
+  ticket_text: "Our OAuth integration can read data but can't write. We need the write scope added to our app."
+  expected:
+    triage_category: auth
+    reply_contains: ["OAuth", "scope"]
+  tags: [oauth]
+
+- id: auth-007
+  title: Session expires too quickly
+  category: auth
+  severity: low
+  ticket_text: "I get logged out every 15 minutes. Can the session timeout be increased to at least an hour?"
+  expected:
+    triage_category: auth
+    reply_contains: ["session", "timeout"]
+  tags: [session]
+
+- id: auth-008
+  title: SAML configuration error
+  category: auth
+  severity: high
+  ticket_text: "We're setting up SAML with Azure AD but getting 'Invalid SAML response' errors. Here's our metadata XML."
+  expected:
+    triage_category: auth
+    reply_contains: ["SAML"]
+  tags: [sso, configuration]
+
+- id: auth-009
+  title: Role permissions wrong
+  category: auth
+  severity: medium
+  ticket_text: "I'm an admin but I can't access the billing page. It says 'insufficient permissions'."
+  expected:
+    triage_category: auth
+    reply_contains: ["permission", "role"]
+  tags: [rbac]
+
+- id: auth-010
+  title: Service account token expired
+  category: auth
+  severity: high
+  ticket_text: "Our CI/CD pipeline broke because the service account token expired. How do we get a non-expiring token?"
+  expected:
+    triage_category: auth
+    reply_contains: ["token"]
+  tags: [service_account]
+
+- id: auth-011
+  title: Cross-origin login failure
+  category: auth
+  severity: medium
+  ticket_text: "Login works on our main domain but fails on our subdomain with a CORS error."
+  expected:
+    triage_category: auth
+    reply_contains: ["CORS"]
+  tags: [cors]
+
+- id: auth-012
+  title: IP allowlist blocking legitimate users
+  category: auth
+  severity: high
+  ticket_text: "We enabled IP allowlisting but now our remote workers can't access the platform."
+  expected:
+    triage_category: auth
+    reply_contains: ["IP", "allowlist"]
+  tags: [network]
+
+- id: auth-013
+  title: JWT validation fails intermittently
+  category: auth
+  severity: high
+  ticket_text: "About 10% of our API calls fail with 'invalid JWT signature'. The same token works on retry."
+  expected:
+    triage_category: auth
+    reply_contains: ["JWT"]
+  tags: [intermittent]
+
+- id: auth-014
+  title: Account locked after failed attempts
+  category: auth
+  severity: medium
+  ticket_text: "My account was locked after 5 failed login attempts. The lockout message says wait 1 hour but it's been 3 hours."
+  expected:
+    triage_category: auth
+    reply_contains: ["locked", "account"]
+  tags: [lockout]
+
+- id: auth-015
+  title: Deactivated user still has access
+  category: auth
+  severity: critical
+  ticket_text: "We deactivated a former employee's account but they can still access our workspace via their API key."
+  expected:
+    triage_category: auth
+    triage_severity: critical
+    reply_contains: ["deactivated"]
+  tags: [critical, security]
+
+- id: auth-016
+  title: Google OAuth redirect URI mismatch
+  category: auth
+  severity: medium
+  ticket_text: "Google OAuth login fails with 'redirect_uri_mismatch'. I've set it to https://app.example.com/callback."
+  expected:
+    triage_category: auth
+    reply_contains: ["redirect"]
+  tags: [oauth]
+
+- id: auth-017
+  title: Invited user can't join workspace
+  category: auth
+  severity: medium
+  ticket_text: "I sent an invitation to a new team member but they get 'invalid invitation' when clicking the link."
+  expected:
+    triage_category: auth
+    reply_contains: ["invitation"]
+  tags: [invitation]
+
+- id: auth-018
+  title: Two-factor backup codes not working
+  category: auth
+  severity: high
+  ticket_text: "None of my 2FA backup codes work. I've tried all 10 of them. I'm completely locked out of my account."
+  expected:
+    triage_category: auth
+    triage_severity: high
+    reply_contains: ["backup", "code"]
+  tags: [mfa]
+
+- id: auth-019
+  title: API authentication header format
+  category: auth
+  severity: low
+  ticket_text: "What's the correct format for the Authorization header? Bearer token or Basic auth?"
+  expected:
+    triage_category: auth
+    triage_severity: low
+    reply_contains: ["Authorization", "header"]
+  tags: [documentation]
+
+- id: auth-020
+  title: Webhook signature verification failing
+  category: auth
+  severity: medium
+  ticket_text: "Our webhook endpoint can't verify the signature on incoming events. We're using HMAC-SHA256."
+  expected:
+    triage_category: auth
+    reply_contains: ["webhook", "signature"]
+  tags: [webhook]
+
+# =============================================================================
+# PERFORMANCE — 20 scenarios
+# =============================================================================
+
+- id: perf-001
+  title: API response times spiking
+  category: performance
+  severity: high
+  ticket_text: "Our API calls are taking 5-10 seconds instead of the usual 200ms. Started happening today around 2pm."
+  expected:
+    triage_category: performance
+    triage_severity: high
+    reply_contains: ["latency"]
+  tags: [latency]
+
+- id: perf-002
+  title: Rate limit too low
+  category: performance
+  severity: medium
+  ticket_text: "We're hitting the 100 req/min rate limit regularly. We need at least 500 req/min for production."
+  expected:
+    triage_category: performance
+    reply_contains: ["rate limit"]
+  tags: [rate_limit]
+
+- id: perf-003
+  title: Timeout on large exports
+  category: performance
+  severity: medium
+  ticket_text: "Exporting reports with more than 10,000 rows always times out with a 504 Gateway Timeout."
+  expected:
+    triage_category: performance
+    reply_contains: ["timeout", "export"]
+  tags: [timeout]
+
+- id: perf-004
+  title: Dashboard loads slowly
+  category: performance
+  severity: low
+  ticket_text: "The analytics dashboard takes 15+ seconds to load. It used to be instant."
+  expected:
+    triage_category: performance
+    reply_contains: ["dashboard", "performance"]
+  tags: [frontend]
+
+- id: perf-005
+  title: Webhook delivery delays
+  category: performance
+  severity: high
+  ticket_text: "Webhooks are being delivered 10-15 minutes late. Our downstream systems depend on real-time events."
+  expected:
+    triage_category: performance
+    triage_severity: high
+    reply_contains: ["webhook", "delay"]
+  tags: [webhook]
+
+- id: perf-006
+  title: Search returns no results for valid queries
+  category: performance
+  severity: high
+  ticket_text: "Full-text search returns empty results for queries that I know should match. Worked fine yesterday."
+  expected:
+    triage_category: performance
+    reply_contains: ["search"]
+  tags: [search, regression]
+
+- id: perf-007
+  title: File upload stalls at 99%
+  category: performance
+  severity: medium
+  ticket_text: "Large file uploads (>50MB) consistently stall at 99% and never complete."
+  expected:
+    triage_category: performance
+    reply_contains: ["upload"]
+  tags: [upload]
+
+- id: perf-008
+  title: Database connection pool exhausted
+  category: performance
+  severity: critical
+  ticket_text: "Getting 'connection pool exhausted' errors on all API endpoints. Nothing works."
+  expected:
+    triage_category: performance
+    triage_severity: critical
+    reply_contains: ["connection"]
+  tags: [critical, database]
+
+- id: perf-009
+  title: Memory usage growing unbounded
+  category: performance
+  severity: high
+  ticket_text: "Our self-hosted instance's memory usage keeps growing until it OOMs every ~6 hours."
+  expected:
+    triage_category: performance
+    reply_contains: ["memory"]
+  tags: [self_hosted]
+
+- id: perf-010
+  title: Concurrent request limit
+  category: performance
+  severity: medium
+  ticket_text: "What's the concurrent request limit? We're seeing sporadic 429s when our batch jobs run."
+  expected:
+    triage_category: performance
+    reply_contains: ["concurrent", "limit"]
+  tags: [rate_limit]
+
+- id: perf-011
+  title: CDN cache not invalidating
+  category: performance
+  severity: medium
+  ticket_text: "I updated our logo 2 hours ago but the old version still shows. CDN cache isn't clearing."
+  expected:
+    triage_category: performance
+    reply_contains: ["cache"]
+  tags: [cdn]
+
+- id: perf-012
+  title: Batch API extremely slow
+  category: performance
+  severity: high
+  ticket_text: "The batch processing API is taking 30 minutes for 1000 records. Used to finish in under 2 minutes."
+  expected:
+    triage_category: performance
+    triage_severity: high
+    reply_contains: ["batch"]
+  tags: [batch, regression]
+
+- id: perf-013
+  title: Real-time sync lag
+  category: performance
+  severity: high
+  ticket_text: "Changes made in one browser tab take 30+ seconds to appear in another. Real-time sync seems broken."
+  expected:
+    triage_category: performance
+    reply_contains: ["sync", "real-time"]
+  tags: [realtime]
+
+- id: perf-014
+  title: Cold start latency
+  category: performance
+  severity: medium
+  ticket_text: "First API call after idle always takes 8-10 seconds. Subsequent calls are fast."
+  expected:
+    triage_category: performance
+    reply_contains: ["cold start"]
+  tags: [serverless]
+
+- id: perf-015
+  title: GraphQL query complexity limit
+  category: performance
+  severity: low
+  ticket_text: "Our nested GraphQL query hits the complexity limit. Can the limit be raised for our account?"
+  expected:
+    triage_category: performance
+    reply_contains: ["GraphQL", "complexity"]
+  tags: [graphql]
+
+- id: perf-016
+  title: Image resize very slow
+  category: performance
+  severity: medium
+  ticket_text: "Image processing (thumbnail generation) takes 45 seconds per image. We upload hundreds daily."
+  expected:
+    triage_category: performance
+    reply_contains: ["image"]
+  tags: [media]
+
+- id: perf-017
+  title: Pagination broken on large datasets
+  category: performance
+  severity: medium
+  ticket_text: "Cursor-based pagination returns duplicate results after page 50. We have 500,000+ records."
+  expected:
+    triage_category: performance
+    reply_contains: ["pagination"]
+  tags: [pagination, bug]
+
+- id: perf-018
+  title: SSL handshake slow
+  category: performance
+  severity: low
+  ticket_text: "We're seeing 500ms+ SSL handshake times from our Asia-Pacific region. Is there a closer endpoint?"
+  expected:
+    triage_category: performance
+    reply_contains: ["SSL"]
+  tags: [network, regional]
+
+- id: perf-019
+  title: Streaming API drops connections
+  category: performance
+  severity: high
+  ticket_text: "Our SSE connection to the streaming API drops every 2-3 minutes. We have to reconnect constantly."
+  expected:
+    triage_category: performance
+    triage_severity: high
+    reply_contains: ["streaming", "connection"]
+  tags: [streaming]
+
+- id: perf-020
+  title: Query timeout on aggregation
+  category: performance
+  severity: medium
+  ticket_text: "Analytics aggregation queries on date ranges > 90 days always timeout. Works for 30-day ranges."
+  expected:
+    triage_category: performance
+    reply_contains: ["query", "timeout"]
+  tags: [analytics]
+
+# =============================================================================
+# CONFIG — 20 scenarios
+# =============================================================================
+
+- id: config-001
+  title: CSV export returns 500
+  category: config
+  severity: high
+  ticket_text: "The CSV export button returns a 500 error since yesterday."
+  expected:
+    triage_category: config
+    reply_contains: ["export", "error"]
+  tags: [bug]
+
+- id: config-002
+  title: Custom domain not resolving
+  category: config
+  severity: high
+  ticket_text: "I added a custom domain 24 hours ago and set up CNAME records but it's not resolving."
+  expected:
+    triage_category: config
+    reply_contains: ["domain", "DNS"]
+  tags: [dns]
+
+- id: config-003
+  title: Email notifications not sending
+  category: config
+  severity: medium
+  ticket_text: "None of our team members are receiving email notifications for new events. Started 2 days ago."
+  expected:
+    triage_category: config
+    reply_contains: ["notification", "email"]
+  tags: [notifications]
+
+- id: config-004
+  title: Timezone display incorrect
+  category: config
+  severity: low
+  ticket_text: "All timestamps in the dashboard show UTC. How do I change it to Pacific Time?"
+  expected:
+    triage_category: config
+    triage_severity: low
+    reply_contains: ["timezone"]
+  tags: [simple]
+
+- id: config-005
+  title: Webhook URL validation error
+  category: config
+  severity: medium
+  ticket_text: "I'm trying to set a webhook URL to https://hooks.example.com/resolute but it says 'invalid URL'."
+  expected:
+    triage_category: config
+    reply_contains: ["webhook", "URL"]
+  tags: [webhook]
+
+- id: config-006
+  title: Dark mode broken
+  category: config
+  severity: low
+  ticket_text: "Dark mode toggle doesn't work. The page flashes dark then goes back to light mode."
+  expected:
+    triage_category: config
+    triage_severity: low
+    reply_contains: ["dark mode"]
+  tags: [ui]
+
+- id: config-007
+  title: API versioning question
+  category: config
+  severity: low
+  ticket_text: "We're still on API v1. When does v1 get deprecated and how do we migrate to v2?"
+  expected:
+    triage_category: config
+    reply_contains: ["API", "version"]
+  tags: [migration]
+
+- id: config-008
+  title: Environment variable not recognized
+  category: config
+  severity: medium
+  ticket_text: "Setting RESOLUTE_LOG_LEVEL=debug has no effect. Logs still show info level only."
+  expected:
+    triage_category: config
+    reply_contains: ["environment", "variable"]
+  tags: [self_hosted]
+
+- id: config-009
+  title: Backup restoration failed
+  category: config
+  severity: critical
+  ticket_text: "We're trying to restore from a backup but the import fails with 'schema version mismatch'."
+  expected:
+    triage_category: config
+    triage_severity: critical
+    reply_contains: ["backup", "restore"]
+  tags: [critical, data]
+
+- id: config-010
+  title: Localization missing strings
+  category: config
+  severity: low
+  ticket_text: "Several UI strings show as '[untranslated]' when I set the language to French."
+  expected:
+    triage_category: config
+    reply_contains: ["localization"]
+  tags: [i18n]
+
+- id: config-011
+  title: Integration with Slack not posting
+  category: config
+  severity: medium
+  ticket_text: "Our Slack integration was working but stopped posting notifications to our channel yesterday."
+  expected:
+    triage_category: config
+    reply_contains: ["Slack", "integration"]
+  tags: [integration]
+
+- id: config-012
+  title: Custom field validation too strict
+  category: config
+  severity: low
+  ticket_text: "The custom field for 'Phone Number' rejects valid international numbers like +44 20 7946 0958."
+  expected:
+    triage_category: config
+    reply_contains: ["validation"]
+  tags: [custom_fields]
+
+- id: config-013
+  title: Data retention policy question
+  category: config
+  severity: medium
+  ticket_text: "What's your data retention policy? We need to comply with GDPR's right to erasure."
+  expected:
+    triage_category: config
+    reply_contains: ["data", "retention"]
+  tags: [compliance]
+
+- id: config-014
+  title: Scheduled report not running
+  category: config
+  severity: medium
+  ticket_text: "I set up a weekly report to run every Monday at 9am but it hasn't run for 3 weeks."
+  expected:
+    triage_category: config
+    reply_contains: ["scheduled", "report"]
+  tags: [reports]
+
+- id: config-015
+  title: CORS settings for embedded widget
+  category: config
+  severity: medium
+  ticket_text: "Our embedded widget fails with CORS errors when loaded from customer sites."
+  expected:
+    triage_category: config
+    reply_contains: ["CORS"]
+  tags: [cors, embedding]
+
+- id: config-016
+  title: Database migration stuck
+  category: config
+  severity: high
+  ticket_text: "The automatic migration is stuck on step 4 of 7. It's been 2 hours with no progress."
+  expected:
+    triage_category: config
+    triage_severity: high
+    reply_contains: ["migration"]
+  tags: [self_hosted, migration]
+
+- id: config-017
+  title: Log forwarding to Datadog
+  category: config
+  severity: low
+  ticket_text: "How do I forward application logs to Datadog? I don't see a built-in integration."
+  expected:
+    triage_category: config
+    reply_contains: ["log"]
+  tags: [observability]
+
+- id: config-018
+  title: Auto-scaling not triggering
+  category: config
+  severity: high
+  ticket_text: "Auto-scaling rules are configured but instances never scale beyond 2 even at 90% CPU."
+  expected:
+    triage_category: config
+    triage_severity: high
+    reply_contains: ["scaling"]
+  tags: [infrastructure]
+
+- id: config-019
+  title: SSL certificate renewal
+  category: config
+  severity: medium
+  ticket_text: "Our custom domain SSL certificate expires in 3 days. Will it auto-renew or do we need to act?"
+  expected:
+    triage_category: config
+    reply_contains: ["SSL", "certificate"]
+  tags: [ssl]
+
+- id: config-020
+  title: Feature flag not taking effect
+  category: config
+  severity: medium
+  ticket_text: "I enabled the 'new-dashboard' feature flag but users still see the old dashboard."
+  expected:
+    triage_category: config
+    reply_contains: ["feature flag"]
+  tags: [feature_flags]
+
+# =============================================================================
+# OTHER — 10 scenarios
+# =============================================================================
+
+- id: other-001
+  title: Feature request - dark mode API
+  category: other
+  severity: low
+  ticket_text: "It would be great if the API returned theme preference so we can match dark mode in our app."
+  expected:
+    triage_category: other
+    triage_severity: low
+    reply_contains: ["feature"]
+  tags: [feature_request]
+
+- id: other-002
+  title: Documentation outdated
+  category: other
+  severity: low
+  ticket_text: "The API docs for the /users endpoint still show the v1 schema. The actual response is different."
+  expected:
+    triage_category: other
+    reply_contains: ["documentation"]
+  tags: [docs]
+
+- id: other-003
+  title: Status page not updated during outage
+  category: other
+  severity: medium
+  ticket_text: "Your service was clearly down for 2 hours but the status page showed 'all systems operational' the whole time."
+  expected:
+    triage_category: other
+    reply_contains: ["status"]
+  tags: [outage]
+
+- id: other-004
+  title: Partner API integration
+  category: other
+  severity: low
+  ticket_text: "We want to build a two-way sync between your platform and Salesforce. Do you have a partner API?"
+  expected:
+    triage_category: other
+    reply_contains: ["integration"]
+  tags: [partner]
+
+- id: other-005
+  title: GDPR data export
+  category: other
+  severity: medium
+  ticket_text: "Under GDPR, I'm requesting a full export of all personal data you hold about user john@example.com."
+  expected:
+    triage_category: other
+    reply_contains: ["GDPR", "data"]
+  tags: [compliance]
+
+- id: other-006
+  title: Bug bounty submission
+  category: other
+  severity: high
+  ticket_text: "I found an XSS vulnerability on your login page. Is there a bug bounty program? Here's the PoC: <script>alert(1)</script>"
+  expected:
+    triage_category: other
+    reply_contains: ["security"]
+    reply_not_contains: ["<script>"]
+  tags: [security]
+
+- id: other-007
+  title: Account deletion request
+  category: other
+  severity: medium
+  ticket_text: "Please delete my account and all associated data immediately. I no longer use the service."
+  expected:
+    triage_category: other
+    reply_contains: ["account", "delete"]
+  tags: [deletion]
+
+- id: other-008
+  title: Accessibility compliance
+  category: other
+  severity: medium
+  ticket_text: "We need WCAG 2.1 AA compliance for our procurement process. Is your product certified?"
+  expected:
+    triage_category: other
+    reply_contains: ["accessibility"]
+  tags: [compliance]
+
+- id: other-009
+  title: Uptime SLA question
+  category: other
+  severity: low
+  ticket_text: "What's your guaranteed uptime SLA? We need 99.95% for our enterprise contract."
+  expected:
+    triage_category: other
+    reply_contains: ["SLA", "uptime"]
+  tags: [enterprise]
+
+- id: other-010
+  title: White-label options
+  category: other
+  severity: low
+  ticket_text: "Can we white-label your product and resell it under our brand? What are the licensing terms?"
+  expected:
+    triage_category: other
+    reply_contains: ["white-label"]
+  tags: [partner]
