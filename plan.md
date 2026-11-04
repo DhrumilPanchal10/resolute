@@ -112,7 +112,7 @@ resolute/
 
 ## Phase 2 — agentcore spine
 
-- [ ] **T2.1 Telemetry** · Tool: Claude Code · Model: default
+- [x] **T2.1 Telemetry** · Tool: Claude Code · Model: default
   - Do: `telemetry.py` — OTel tracer provider, OTLP exporter (Langfuse or Phoenix via env), helpers `span_agent`, `span_llm`, `span_tool`, `span_retrieval_stage` using GenAI semantic-convention attribute names (`gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.tool.name`) + custom `resolute.cost_usd`, `resolute.tenant_id`.
   - Done when: a test run shows nested spans in the tracing UI (screenshot to `docs/results/`).
 - [x] **T2.2 Routing + fallback** · Tool: Claude Code · Model: default

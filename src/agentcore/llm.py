@@ -16,6 +16,7 @@ from agentcore.cost import CallCost, RunCost
 from agentcore.errors import BudgetExceeded
 from agentcore.offline import is_offline, load_fixture, save_fixture
 from agentcore.routing import Route, routes_for_tier
+from agentcore.telemetry import span_llm
 from resolute.config import settings
 
 # ---------------------------------------------------------------------------
@@ -111,44 +112,50 @@ async def complete(
         if schema is not None:
             call_kwargs["response_format"] = schema
 
-        try:
-            t0 = time.perf_counter()
-            response = await call(**call_kwargs)
-            latency_ms = (time.perf_counter() - t0) * 1000
-        except _RETRYABLE_TYPES as exc:
-            last_exc = exc
-            continue  # try next route
+        async with span_llm(route.model, tier=model_tier) as span:
+            try:
+                t0 = time.perf_counter()
+                response = await call(**call_kwargs)
+                latency_ms = (time.perf_counter() - t0) * 1000
+            except _RETRYABLE_TYPES as exc:
+                last_exc = exc
+                continue  # try next route
 
-        usage = getattr(response, "usage", None)
-        input_tokens = getattr(usage, "prompt_tokens", 0) or 0
-        output_tokens = getattr(usage, "completion_tokens", 0) or 0
-        cost_usd = litellm.completion_cost(completion_response=response)
-        live_content: str = response.choices[0].message.content or ""
+            usage = getattr(response, "usage", None)
+            input_tokens = getattr(usage, "prompt_tokens", 0) or 0
+            output_tokens = getattr(usage, "completion_tokens", 0) or 0
+            cost_usd = litellm.completion_cost(completion_response=response)
+            live_content: str = response.choices[0].message.content or ""
 
-        tracker.record(
-            CallCost(
-                model=route.model,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                latency_ms=latency_ms,
-                cost_usd=cost_usd,
+            span.set_attribute("gen_ai.usage.input_tokens", input_tokens)
+            span.set_attribute("gen_ai.usage.output_tokens", output_tokens)
+            span.set_attribute("resolute.cost_usd", cost_usd)
+            span.set_attribute("resolute.latency_ms", latency_ms)
+
+            tracker.record(
+                CallCost(
+                    model=route.model,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    latency_ms=latency_ms,
+                    cost_usd=cost_usd,
+                )
             )
-        )
 
-        save_fixture(
-            model_tier,
-            messages,
-            schema_name,
-            {
-                "content": live_content,
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-                "cost_usd": cost_usd,
-                "latency_ms": latency_ms,
-            },
-        )
+            save_fixture(
+                model_tier,
+                messages,
+                schema_name,
+                {
+                    "content": live_content,
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                    "cost_usd": cost_usd,
+                    "latency_ms": latency_ms,
+                },
+            )
 
-        return _parse(live_content, schema)
+            return _parse(live_content, schema)
 
     raise RuntimeError(f"All routes exhausted for tier={model_tier!r}.") from last_exc
 

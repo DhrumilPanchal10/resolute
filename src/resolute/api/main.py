@@ -36,6 +36,8 @@ from resolute.api.routes_approvals import router as approvals_router
 from resolute.api.routes_tickets import router as tickets_router
 from resolute.api.sse import EventBus
 from resolute.api.store import GraphRunner, TicketStore
+from agentcore.telemetry import init_telemetry
+from resolute.config import settings
 from resolute.graph.build import build_graph
 
 
@@ -57,6 +59,11 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):  # type: ignore[no-untyped-def]
+        init_telemetry(
+            endpoint=settings.otlp_endpoint,
+            langfuse_public=settings.langfuse_public_key,
+            langfuse_secret=settings.langfuse_secret_key,
+        )
         # Only initialise here when no injected deps (production path).
         if not hasattr(application.state, "store"):
             _graph = build_graph()

@@ -26,6 +26,7 @@ from enum import StrEnum
 from functools import wraps
 from typing import Any
 
+from agentcore.telemetry import span_agent
 from resolute.config import settings
 
 logger = logging.getLogger(__name__)
@@ -237,27 +238,33 @@ def guarded(
                     errors.append(result.message)
 
             # --- Node execution (never lets exceptions escape) ---
-            try:
-                output: dict[str, Any] = await fn(state)
-            except Exception as exc:
-                msg = f"[{node_name}] node raised {type(exc).__name__}: {exc}"
-                logger.error("guardrails caught: %s", msg)
-                return {"errors": [msg], "degraded": True}
+            async with span_agent(
+                node_name,
+                tenant_id=state.get("tenant_id", ""),
+                ticket_id=state.get("ticket_id", ""),
+            ) as span:
+                try:
+                    output: dict[str, Any] = await fn(state)
+                except Exception as exc:
+                    msg = f"[{node_name}] node raised {type(exc).__name__}: {exc}"
+                    logger.error("guardrails caught: %s", msg)
+                    return {"errors": [msg], "degraded": True}
 
-            # --- Post-checks ---
-            for check_fn in _POST_CHECKS:
-                result = check_fn(node_name, output)
-                if not result.passed:
-                    policy = effective.get(result.check, Policy.WARN)
-                    if policy == Policy.BLOCK:
-                        return {"errors": [result.message], "degraded": True}
-                    logger.warning("guardrails warn: %s", result.message)
+                # --- Post-checks ---
+                for check_fn in _POST_CHECKS:
+                    result = check_fn(node_name, output)
+                    if not result.passed:
+                        policy = effective.get(result.check, Policy.WARN)
+                        if policy == Policy.BLOCK:
+                            span.set_attribute("resolute.degraded", True)
+                            return {"errors": [result.message], "degraded": True}
+                        logger.warning("guardrails warn: %s", result.message)
 
-            if errors:
-                existing = output.get("errors", [])
-                output["errors"] = existing + errors
+                if errors:
+                    existing = output.get("errors", [])
+                    output["errors"] = existing + errors
 
-            return output
+                return output
 
         return wrapper
 
