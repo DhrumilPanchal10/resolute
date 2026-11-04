@@ -99,6 +99,28 @@ async def run(tenants: int, accounts_per_tenant: int) -> None:
                             ),
                         )
 
+                    _log_messages = [
+                        ("INFO", f"Account {account_id} created on {plan} plan"),
+                        ("INFO", f"Subscription activated for account {account_id}"),
+                        ("WARN", f"Payment retry attempted for account {account_id}"),
+                        ("ERROR", f"Invoice generation failed for account {account_id}"),
+                        ("INFO", f"Support ticket opened by account {account_id}"),
+                    ]
+                    for _ in range(random.randint(3, 6)):
+                        level, msg = random.choice(_log_messages)
+                        await cur.execute(
+                            "INSERT INTO logs (id, tenant_id, account_id, level, message, occurred_at)"
+                            " VALUES (%s, %s, %s, %s, %s, %s)",
+                            (
+                                str(uuid.uuid4()),
+                                tenant_id,
+                                account_id,
+                                level,
+                                msg,
+                                datetime.now(UTC) - timedelta(minutes=random.randint(0, 43200)),
+                            ),
+                        )
+
                 await conn.commit()
                 print(f"  → {accounts_per_tenant} accounts seeded for {tenant_name}")
 

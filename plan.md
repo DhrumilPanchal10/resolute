@@ -157,7 +157,7 @@ resolute/
 - [x] **T4.2 docs server** · Tool: Claude Code · Model: small — `search_docs(query, k)` using Phase 3.
 - [x] **T4.3 accounts server** · Tool: Claude Code · Model: small — `get_account`, `get_invoices`, `get_usage` over Postgres (RLS); `scripts/seed_northwind.py` seeds 2 tenants × 30 accounts, invoices, synthetic logs.
 - [x] **T4.4 github server** · Tool: Claude Code · Model: default — `search_issues(q, as_of)`, `get_issue`, `search_code`, `create_issue` (write); uses the requesting user's token (no shared admin token).
-- [ ] **T4.5 logs server** · Tool: Claude Code · Model: small — `search_logs(account_id, since, level, text)` over Postgres full-text.
+- [x] **T4.5 logs server** · Tool: Claude Code · Model: small — `search_logs(account_id, since, level, text)` over Postgres full-text.
 - [ ] **T4.6 stripe server** · Tool: Claude Code · Model: default — Stripe TEST mode: `issue_credit`, `refund_invoice` (write); requires `approval_token` for amounts over policy; idempotency key = hash(ticket_id, action, args).
   - Done when (phase): integration tests for each server incl. RBAC denial and audit row written.
 
