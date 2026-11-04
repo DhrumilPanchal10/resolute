@@ -48,6 +48,8 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("memory", "read"): frozenset({"support_engineer", "lead", "admin"}),
     ("memory", "write"): frozenset({"lead", "admin"}),
     ("docs", "read"): frozenset({"support_engineer", "lead", "admin", "contractor"}),
+    ("github", "read"): frozenset({"support_engineer", "lead", "admin", "contractor"}),
+    ("github", "write"): frozenset({"support_engineer", "lead", "admin"}),
     ("audit", "read"): frozenset({"admin"}),
     ("config", "write"): frozenset({"admin"}),
 }
