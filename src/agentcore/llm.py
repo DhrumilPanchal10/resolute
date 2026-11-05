@@ -48,6 +48,7 @@ _RETRYABLE_TYPES = (
     litellm_exc.ServiceUnavailableError,
     litellm_exc.BadGatewayError,
     litellm_exc.APIConnectionError,
+    litellm_exc.Timeout,
 )
 
 
@@ -65,7 +66,7 @@ def _make_retrying_call(route: Route) -> Any:
         reraise=True,
     )
     async def _call(**kwargs: Any) -> Any:
-        return await litellm.acompletion(model=route.model, **kwargs)
+        return await litellm.acompletion(model=route.model, timeout=settings.llm_timeout, **kwargs)
 
     return _call
 

@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     redis_url: str = Field(default="redis://localhost:6379/0")
 
     # LLM model names (never hardcode — always read from config)
-    model_small: str = Field(default="gemini/gemini-1.5-flash")
-    model_strong: str = Field(default="gemini/gemini-1.5-pro")
-    model_judge: str = Field(default="gemini/gemini-1.5-pro")
+    model_small: str = Field(default="gemini/gemini-3.1-flash-lite")
+    model_strong: str = Field(default="gemini/gemini-3.8-flash")
+    model_judge: str = Field(default="gemini/gemini-3.1-flash-lite")
 
     # LLM provider API keys
     gemini_api_key: str = Field(default="")
@@ -47,6 +47,9 @@ class Settings(BaseSettings):
 
     # Per-run LLM budget ceiling (USD)
     budget_usd_max: float = Field(default=0.10)
+
+    # LLM call timeout (seconds)
+    llm_timeout: int = Field(default=30)
 
 
 settings: Settings = Settings()
