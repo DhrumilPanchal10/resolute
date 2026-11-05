@@ -1,17 +1,14 @@
 import type { NextConfig } from "next";
 
+const isGhPages = process.env.GITHUB_PAGES === "true";
+const repo = "resolute";
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
-  },
+  output: "export",
+  basePath: isGhPages ? `/${repo}` : "",
+  assetPrefix: isGhPages ? `/${repo}/` : undefined,
+  images: { unoptimized: true },
+  trailingSlash: true,
 };
 
 export default nextConfig;
