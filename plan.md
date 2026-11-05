@@ -201,7 +201,7 @@ resolute/
 ## Phase 9 — Deploy and polish
 
 - [x] **T9.1 Containers** · Tool: Claude Code · Model: small — Dockerfiles (API, worker), multi-stage, non-root.
-- [ ] **T9.2 Deploy** · Tool: you + Claude Code · Model: small — API on Render/Koyeb free tier, web on Vercel, Supabase + Upstash; Terraform in `infra/terraform/` for AWS (apply via AWS Academy/free credits or LocalStack); only claim what actually ran.
+- [x] **T9.2 Deploy** · Tool: you + Claude Code · Model: small — API on Render/Koyeb free tier, web on Vercel, Supabase + Upstash; Terraform in `infra/terraform/` for AWS (apply via AWS Academy/free credits or LocalStack); only claim what actually ran.
 - [ ] **T9.3 README + diagrams** · Tool: claude.ai/Gemini draft, you edit — structure in Appendix C.
 - [ ] **T9.4 Demo** · Tool: you — 2-minute and 5-minute recordings.
 

@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: resolute-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.api
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MODEL_SMALL
+        value: gemini/gemini-3.1-flash-lite
+      - key: MODEL_STRONG
+        value: gemini/gemini-3.8-flash
+      - key: OFFLINE
+        value: "0"
+    plan: free
+    healthCheckPath: /docs
+
+  - type: worker
+    name: resolute-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile.worker
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+    plan: free
