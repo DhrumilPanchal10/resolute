@@ -36,3 +36,4 @@ T8.3 (2026-11-04): agentcore/prompt_cache.py — build_cached_messages (stable p
 T8.4 (2026-11-04): tests/load/ — k6 script (k6_tickets.js) for HTTP load testing with p95 threshold; Python load tests (10 concurrent, 5 sequential throughput, 20-ticket burst); all offline; 3 tests; 390 pass.
 T9.1 (2026-11-04): Dockerfile.api + Dockerfile.worker (multi-stage, non-root), .dockerignore, docker-compose api+worker services, worker.py entry point; live Gemini integration (gemini-3.1-flash-lite default, 3.8-flash fallback, timeout+retry); 17 container tests; 407 pass.
 T9.2 (2026-11-04): infra/terraform/ (VPC, ECS Fargate, ECR, IAM, CloudWatch); render.yaml (API + worker on free tier); apps/web/vercel.json (Next.js deploy); 14 deploy tests; 421 pass.
+T9.3 (2026-11-04): README.md — pitch, results table, architecture diagram, production spine with file links, eval method, threat model, quickstart, design decisions, roadmap, project structure.
