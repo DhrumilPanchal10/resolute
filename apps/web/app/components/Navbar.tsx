@@ -51,7 +51,7 @@ export function Navbar({ userName }: { userName: string }) {
 
       <div className="px-3 pb-4 space-y-2">
         <Link
-          href="https://github.com/DhrumilPanchal7510/resolute"
+          href="https://github.com/DhrumilPanchal10/resolute"
           target="_blank"
           className="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-gray-300 transition-colors"
         >

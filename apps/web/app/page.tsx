@@ -78,7 +78,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link
-              href="https://github.com/DhrumilPanchal7510/resolute"
+              href="https://github.com/DhrumilPanchal10/resolute"
               target="_blank"
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
@@ -120,7 +120,7 @@ export default function LandingPage() {
               Try Live Demo <ArrowRight size={16} />
             </Link>
             <Link
-              href="https://github.com/DhrumilPanchal7510/resolute"
+              href="https://github.com/DhrumilPanchal10/resolute"
               target="_blank"
               className="inline-flex items-center gap-2 border border-gray-700 text-gray-300 px-6 py-3 rounded-xl font-medium hover:border-gray-500 hover:text-white transition-colors"
             >
