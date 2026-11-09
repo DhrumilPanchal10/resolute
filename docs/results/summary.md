@@ -1,6 +1,6 @@
 # Evaluation Summary
 
-**Date:** 2026-11-04
+**Date:** 2026-11-05
 **Mode:** offline (canned LLM responses)
 **Gate:** PASS
 
@@ -13,7 +13,7 @@
 | Issues evaluated | 5 | — |
 | Triage rate | 100% | ≥ 80% |
 | Reply rate | 100% | ≥ 60% |
-| Avg latency | 5 ms | — |
+| Avg latency | 4 ms | — |
 
 ## Scenario Evaluation
 

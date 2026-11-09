@@ -16,8 +16,7 @@ build/
 venv/
 .uv/
 
-# uv
-uv.lock
+# uv — uv.lock is committed: it pins the exact dependency set for reproducible installs
 
 # Testing
 .pytest_cache/
